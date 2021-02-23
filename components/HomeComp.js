@@ -1,17 +1,34 @@
 import React, { Component } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, Animated } from "react-native";
 import { Card } from "react-native-elements";
-import { CAMPSITES } from "../shared/campsites";
-import { PROMOTIONS } from "../shared/promotions";
-import { PARTNERS } from "../shared/partners";
+import { connect } from "react-redux";
+import { baseUrl } from "../shared/baseUrl";
+import Loading from "./LoadingComp";
 
-function RenderItem({ item }) {
+const mapStateToProps = (state) => {
+  return {
+    services: state.services,
+    promotions: state.promotions,
+    partners: state.partners,
+  };
+};
+
+function RenderItem(props) {
+  const { item } = props;
+
+  if (props.isLoading) {
+    return <Loading />;
+  }
+  if (props.errMess) {
+    return (
+      <View>
+        <Text>{props.errMess}</Text>
+      </View>
+    );
+  }
   if (item) {
     return (
-      <Card
-        featuredTitle={item.name}
-        image={require("./images/UrgentCareBPimage.jpg")}
-      >
+      <Card featuredTitle={item.name} image={{ uri: baseUrl + item.image }}>
         <Text style={{ margin: 10 }}>{item.description}</Text>
       </Card>
     );
@@ -23,10 +40,20 @@ class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      campsites: CAMPSITES,
-      promotions: PROMOTIONS,
-      partners: PARTNERS,
+      scaleValue: new Animated.Value(0),
     };
+  }
+
+  animate() {
+    Animated.timing(this.state.scaleValue, {
+      toValue: 1,
+      duration: 1500,
+      useNativeDriver: true,
+    }).start();
+  }
+
+  componentDidMount() {
+    this.animate();
   }
 
   static navigationOptions = {
@@ -35,21 +62,39 @@ class Home extends Component {
 
   render() {
     return (
-      <ScrollView>
+      <Animated.ScrollView
+        style={{ transform: [{ scale: this.state.scaleValue }] }}
+      >
         <RenderItem
-          item={this.state.campsites.filter((campsite) => campsite.featured)[0]}
+          item={
+            this.props.services.services.filter(
+              (campsite) => campsite.featured
+            )[0]
+          }
+          isLoading={this.props.services.isLoading}
+          errMess={this.props.services.errMess}
         />
         <RenderItem
           item={
-            this.state.promotions.filter((promotion) => promotion.featured)[0]
+            this.props.promotions.promotions.filter(
+              (promotion) => promotion.featured
+            )[0]
           }
+          isLoading={this.props.promotions.isLoading}
+          errMess={this.props.promotions.errMess}
         />
         <RenderItem
-          item={this.state.partners.filter((partner) => partner.featured)[0]}
+          item={
+            this.props.partners.partners.filter(
+              (partner) => partner.featured
+            )[0]
+          }
+          isLoading={this.props.partners.isLoading}
+          errMess={this.props.partners.errMess}
         />
-      </ScrollView>
+      </Animated.ScrollView>
     );
   }
 }
 
-export default Home;
+export default connect(mapStateToProps)(Home);

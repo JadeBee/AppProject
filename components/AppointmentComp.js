@@ -1,35 +1,151 @@
 import React, { Component } from "react";
-import { Text, View, ScrollView, FlatList } from "react-native";
-import { Card, Icon } from "react-native-elements";
-import { CAMPSITES } from "../shared/campsites";
-import { COMMENTS } from "../shared/comments";
+import { Card, Icon, Rating, Input } from "react-native-elements";
+import { connect } from "react-redux";
+import { baseUrl } from "../shared/baseUrl";
+import { postFavorite, postComment } from "../redux/ActionCreators";
+import * as Animatable from "react-native-animatable";
+import {
+  Text,
+  View,
+  ScrollView,
+  FlatList,
+  Modal,
+  Button,
+  StyleSheet,
+  Alert,
+  PanResponder,
+  Share,
+} from "react-native";
+/*    modal, button and switch are not working bc it says that they are not being used */
 
-function RenderCampsite(props) {
-  const { campsite } = props;
+const mapStateToProps = (state) => {
+  return {
+    services: state.services,
+    comments: state.comments,
+    favorites: state.favorites,
+  };
+};
 
-  if (campsite) {
+const mapDispatchToProps = {
+  postFavorite: (serviceId) => postFavorite(serviceId),
+  postComment: (serviceId, rating, author, text) =>
+    postComment(serviceId, rating, author, text),
+};
+
+function RenderServices(props) {
+  const { service } = props;
+
+  const view = React.createRef();
+
+  const recognizeComment = ({ dx }) => (dx > 200 ? true : false);
+
+  const recognizeDrag = ({ dx }) => (dx < -200 ? true : false);
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderGrant: () => {
+      view.current
+        .rubberBand(1000)
+        .then((endState) =>
+          console.log(endState.finished ? "finished" : "canceled")
+        );
+    },
+    onPanResponderEnd: (e, gestureState) => {
+      console.log("pan responder end", gestureState);
+      if (recognizeDrag(gestureState)) {
+        Alert.alert(
+          "Add Favorite",
+          "Are you sure you wish to add " + service.name + " to favorites?",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+              onPress: () => console.log("Cancel Pressed"),
+            },
+            {
+              text: "OK",
+              onPress: () =>
+                props.favorite
+                  ? console.log("Already set as a favorite")
+                  : props.markFavorite(),
+            },
+          ],
+          { cancelable: false }
+        );
+      } else if (recognizeComment(gestureState)) {
+        props.onShowModal();
+      }
+      return true;
+    },
+  });
+
+  const shareServices = (title, message, url) => {
+    Share.share(
+      {
+        title: title,
+        message: `${title}: ${message} ${url}`,
+        url: url,
+      },
+      {
+        dialogTitle: "Share " + title,
+      }
+    );
+  };
+
+  if (service) {
     return (
-      <Card
-        featuredTitle={campsite.name}
-        image={require("./images/UrgentCareLobby.jpg")}
+      <Animatable.View
+        animation="fadeInDown"
+        duration={2000}
+        delay={1000}
+        ref={view}
+        {...panResponder.panHandlers}
       >
-        <Text style={{ margin: 10 }}>{campsite.description}</Text>
-        <Icon
-          name={props.favorite ? "heart" : "heart-o"}
-          type="font-awesome"
-          color="#f50"
-          raised
-          reverse
-          onPress={() =>
-            props.favorite
-              ? console.log("Already set as a favorite")
-              : props.markFavorite()
-          }
-        />
-      </Card>
+        <Card
+          featuredTitle={service.name}
+          image={{ uri: baseUrl + service.image }}
+        >
+          <Text style={{ margin: 10 }}>{service.description}</Text>
+          <View style={styles.cardRow}>
+            <Icon
+              name={props.favorite ? "heart" : "heart-o"}
+              type="font-awesome"
+              color="#f50"
+              raised
+              reverse
+              onPress={() =>
+                props.favorite
+                  ? console.log("Already set as a favorite")
+                  : props.markFavorite()
+              }
+            />
+            <Icon
+              name={props.favorite ? "pencil" : "pencil"}
+              type="font-awesome"
+              color="#5637DD"
+              raised
+              reverse
+              onPress={() => props.onShowModal()}
+            />
+            <Icon
+              name={"share"}
+              type="font-awesome"
+              color="#5637DD"
+              raised
+              reverse
+              onPress={() =>
+                shareServices(
+                  service.name,
+                  service.description,
+                  baseUrl + service.image
+                )
+              }
+            />
+          </View>
+        </Card>
+      </Animatable.View>
     );
   }
-  return <View />;
 }
 
 function RenderComments({ comments }) {
@@ -37,62 +153,161 @@ function RenderComments({ comments }) {
     return (
       <View style={{ margin: 10 }}>
         <Text style={{ fontSize: 14 }}>{item.text}</Text>
-        <Text style={{ fontSize: 12 }}>{item.rating} Stars</Text>
-        <Text
-          style={{ fontSize: 12 }}
-        >{`-- ${item.author}, ${item.date}`}</Text>
+        {/* <Text style={{ fontSize: 12 }}>{item.rating} Stars</Text> */}
+        <Rating
+          startingValue={item.rating}
+          imageSize={10}
+          style={{ alignItems: "flex-start", paddingVertical: "5%" }}
+          readonly={true}
+        />
+        <Text style={{ fontSize: 12 }}>
+          {`-- ${item.author}, ${item.date}`}
+        </Text>
       </View>
     );
   };
 
   return (
-    <Card title="Comments">
-      <FlatList
-        data={comments}
-        renderItem={renderCommentItem}
-        keyExtractor={(item) => item.id.toString()}
-      />
-    </Card>
+    <Animatable.View animation="fadeInUp" duration={2000} delay={1000}>
+      <Card title="Comments">
+        <FlatList
+          data={comments}
+          renderItem={renderCommentItem}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      </Card>
+    </Animatable.View>
   );
 }
 
-class CampsiteInfo extends Component {
+class ServiceInfo extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      campsites: CAMPSITES,
-      comments: COMMENTS,
-      favorite: false,
+      showModal: false,
+      rating: 5,
+      author: "",
+      text: "",
     };
   }
 
-  markFavorite() {
-    this.setState({ favorite: true });
+  toggleModal() {
+    this.setState({ showModal: !this.state.showModal });
+  }
+
+  handleComment(serviceId) {
+    this.props.postComment(
+      serviceId,
+      this.state.rating,
+      this.state.author,
+      this.state.text
+    );
+    this.toggleModal();
+  }
+
+  resetForm() {
+    this.setState({
+      showModal: false,
+      rating: 5,
+      author: "",
+      text: "",
+    });
+  }
+
+  markFavorite(serviceId) {
+    this.props.postFavorite(serviceId);
   }
 
   static navigationOptions = {
-    title: "Campsite Information",
+    title: "service Information",
   };
 
   render() {
-    const campsiteId = this.props.navigation.getParam("campsiteId");
-    const campsite = this.state.campsites.filter(
-      (campsite) => campsite.id === campsiteId
+    const serviceId = this.props.navigation.getParam("serviceId");
+    const service = this.props.services.services.filter(
+      (service) => service.id === serviceId
     )[0];
-    const comments = this.state.comments.filter(
-      (comment) => comment.campsiteId === campsiteId
+    const comments = this.props.comments.comments.filter(
+      (comment) => comment.serviceId === serviceId
     );
+
     return (
       <ScrollView>
-        <RenderCampsite
-          campsite={campsite}
-          favorite={this.state.favorite}
-          markFavorite={() => this.markFavorite()}
+        <RenderServices
+          service={service}
+          favorite={this.props.favorites.includes(serviceId)}
+          markFavorite={() => this.markFavorite(serviceId)}
+          onShowModal={() => this.toggleModal()}
         />
         <RenderComments comments={comments} />
+        <Modal
+          animationType={"slide"}
+          transparent={false}
+          visible={this.state.showModal}
+          onRequestClose={() => this.toggleModal()}
+        >
+          <View style={styles.modal}>
+            <Rating
+              showRating={true}
+              startingValue={this.state.rating}
+              imageSize={40}
+              onFinishRating={(rating) => this.setState({ rating: rating })}
+              style={{ paddingVertical: 10 }}
+            />
+            <Input
+              placeholder="Author"
+              leftIcon={<Icon name="user-o" type="font-awesome" />}
+              leftIconContainerStyle={{ paddingRight: 10 }}
+              onChangeText={(author) => this.setState({ author: author })}
+              value={this.state.author}
+            />
+            <Input
+              placeholder="Comment"
+              leftIcon={<Icon name="comment-o" type="font-awesome" />}
+              leftIconContainerStyle={{ paddingRight: 10 }}
+              onChangeText={(comment) => this.setState({ text: comment })}
+              value={this.state.text}
+            />
+            <View>
+              <Button
+                title="Submit"
+                color="#5637DD"
+                onPress={() => {
+                  this.handleComment(serviceId);
+                  this.resetForm();
+                }}
+              />
+            </View>
+            <View style={{ margin: 10 }}>
+              <Button
+                onPress={() => {
+                  this.toggleModal();
+                  this.resetForm();
+                }}
+                color="#808080"
+                title="Cancel"
+              />
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     );
   }
 }
 
-export default CampsiteInfo;
+const styles = StyleSheet.create({
+  cardRow: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    flexDirection: "row",
+    margin: 20,
+  },
+  modal: {
+    justifyContent: "center",
+    margin: 20,
+  },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ServiceInfo);
