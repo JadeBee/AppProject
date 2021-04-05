@@ -5,7 +5,7 @@ import ServiceInfo from "./AppointmentComp";
 import About from "./MedsComp";
 import Contact from "./BillComp";
 import Reservation from "./reservationComp";
-import Favorites from "./FavoritesComp";
+import Favorites from "./ResourcesComp";
 import {
   View,
   Platform,
@@ -59,7 +59,7 @@ const DirectoryNavigator = createStackNavigator(
     initialRouteName: "Directory",
     defaultNavigationOptions: {
       headerStyle: {
-        backgroundColor: "#5637DD",
+        backgroundColor: "#5b8a32",
       },
       headerTintColor: "#fff",
       headerTitleStyle: {
@@ -151,7 +151,7 @@ const ReservationNavigator = createStackNavigator(
   {
     defaultNavigationOptions: ({ navigation }) => ({
       headerStyle: {
-        backgroundColor: "#5637DD",
+        backgroundColor: "#5b8a32",
       },
       headerTintColor: "#fff",
       headerTitleStyle: {
@@ -175,7 +175,7 @@ const FavoritesNavigator = createStackNavigator(
   {
     defaultNavigationOptions: ({ navigation }) => ({
       headerStyle: {
-        backgroundColor: "#5637DD",
+        backgroundColor: "#5b8a32",
       },
       headerTintColor: "#fff",
       headerTitleStyle: {
@@ -200,7 +200,7 @@ const LoginNavigator = createStackNavigator(
   {
     defaultNavigationOptions: ({ navigation }) => ({
       headerStyle: {
-        backgroundColor: "#5637DD",
+        backgroundColor: "#5b8a32",
       },
       headerTintColor: "#fff",
       headerTitleStyle: {
@@ -232,7 +232,7 @@ const CustomDrawerContentComponent = (props) => (
           />
         </View>
         <View style={{ flex: 2 }}>
-          <Text style={styles.drawerHeaderText}>NuCamp</Text>
+          <Text style={styles.drawerHeaderText}>Wicked Garden Urgent Care</Text>
         </View>
       </View>
       <DrawerItems {...props} />
@@ -263,36 +263,28 @@ const MainNavigator = createDrawerNavigator(
         ),
       },
     },
-    Directory: {
-      screen: DirectoryNavigator,
-      navigationOptions: {
-        drawerIcon: ({ tintColor }) => (
-          <Icon name="list" type="font-awesome" size={24} color={tintColor} />
-        ),
-      },
-    },
     Reservation: {
       screen: ReservationNavigator,
       navigationOptions: {
-        drawerLabel: "Reserve Campsite",
+        drawerLabel: "Make Appointment",
         drawerIcon: ({ tintColor }) => (
           <Icon name="tree" type="font-awesome" size={24} color={tintColor} />
         ),
       },
     },
-    Favorites: {
-      screen: FavoritesNavigator,
+    Directory: {
+      screen: DirectoryNavigator,
       navigationOptions: {
-        drawerLabel: "My Favorites",
+        drawerLabel: "Test Results",
         drawerIcon: ({ tintColor }) => (
-          <Icon name="heart" type="font-awesome" size={24} color={tintColor} />
+          <Icon name="list" type="font-awesome" size={24} color={tintColor} />
         ),
       },
     },
     About: {
       screen: AboutNavigator,
       navigationOptions: {
-        drawerLabel: "About Us",
+        drawerLabel: "Treatment Plans",
         drawerIcon: ({ tintColor }) => (
           <Icon
             name="info-circle"
@@ -306,7 +298,7 @@ const MainNavigator = createDrawerNavigator(
     Contact: {
       screen: ContactNavigator,
       navigationOptions: {
-        drawerLabel: "Contact Us",
+        drawerLabel: "Make Payment",
         drawerIcon: ({ tintColor }) => (
           <Icon
             name="address-card"
@@ -317,10 +309,20 @@ const MainNavigator = createDrawerNavigator(
         ),
       },
     },
+    Favorites: {
+      screen: FavoritesNavigator,
+      navigationOptions: {
+        drawerLabel: "My Resources",
+        drawerIcon: ({ tintColor }) => (
+          <Icon name="heart" type="font-awesome" size={24} color={tintColor} />
+        ),
+      },
+    },
   },
+
   {
     initialRouteName: "Home",
-    drawerBackgroundColor: "#CEC8FF",
+    drawerBackgroundColor: "#abe0d6",
     contentComponent: CustomDrawerContentComponent,
   }
 );
@@ -393,7 +395,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   drawerHeader: {
-    backgroundColor: "#5637DD",
+    backgroundColor: "#5b8a32",
     height: 140,
     alignItems: "center",
     justifyContent: "center",
