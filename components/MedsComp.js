@@ -16,7 +16,7 @@ function Mission() {
   return (
     <Card title="Our Mission">
       <Text style={{ margin: 10 }}>
-        We have the best Urgent Care. Heres why!!
+        We have the best Urgent Care. Here's why!!
       </Text>
     </Card>
   );
