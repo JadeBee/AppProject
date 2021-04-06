@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Card, Icon, Rating, Input } from "react-native-elements";
 import { connect } from "react-redux";
 import { baseUrl } from "../shared/baseUrl";
-import { postFavorite, postComment } from "../redux/ActionCreators";
+import { postApptDate, postComment } from "../redux/ActionCreators";
 import * as Animatable from "react-native-animatable";
 import {
   Text,
@@ -22,12 +22,12 @@ const mapStateToProps = (state) => {
   return {
     services: state.services,
     comments: state.comments,
-    favorites: state.favorites,
+    ApptDate: state.ApptDate,
   };
 };
 
 const mapDispatchToProps = {
-  postFavorite: (serviceId) => postFavorite(serviceId),
+  postFavorite: (serviceId) => postApptDate(serviceId),
   postComment: (serviceId, rating, author, text) =>
     postComment(serviceId, rating, author, text),
 };
@@ -45,7 +45,7 @@ function RenderServices(props) {
     onStartShouldSetPanResponder: () => true,
     onPanResponderGrant: () => {
       view.current
-        .rubberBand(1000)
+        .rubberBand(400)
         .then((endState) =>
           console.log(endState.finished ? "finished" : "canceled")
         );
@@ -55,7 +55,7 @@ function RenderServices(props) {
       if (recognizeDrag(gestureState)) {
         Alert.alert(
           "Add Favorite",
-          "Are you sure you wish to add " + service.name + " to favorites?",
+          "Are you sure you wish to make a " + service.name + " appointment?",
           [
             {
               text: "Cancel",
@@ -66,7 +66,7 @@ function RenderServices(props) {
               text: "OK",
               onPress: () =>
                 props.favorite
-                  ? console.log("Already set as a favorite")
+                  ? console.log("Appointment already scheduled")
                   : props.markFavorite(),
             },
           ],
@@ -96,8 +96,8 @@ function RenderServices(props) {
     return (
       <Animatable.View
         animation="fadeInDown"
-        duration={2000}
-        delay={1000}
+        duration={800}
+        delay={400}
         ref={view}
         {...panResponder.panHandlers}
       >
@@ -108,21 +108,21 @@ function RenderServices(props) {
           <Text style={{ margin: 10 }}>{service.description}</Text>
           <View style={styles.cardRow}>
             <Icon
-              name={props.favorite ? "heart" : "heart-o"}
+              name={props.favorite ? "calendar" : "calendar-o"}
               type="font-awesome"
               color="#f50"
               raised
               reverse
               onPress={() =>
                 props.favorite
-                  ? console.log("Already set as a favorite")
+                  ? console.log("Add to your Google Calendar")
                   : props.markFavorite()
               }
             />
             <Icon
               name={props.favorite ? "pencil" : "pencil"}
               type="font-awesome"
-              color="#5637DD"
+              color="#5b8a32"
               raised
               reverse
               onPress={() => props.onShowModal()}
@@ -130,7 +130,7 @@ function RenderServices(props) {
             <Icon
               name={"share"}
               type="font-awesome"
-              color="#5637DD"
+              color="#5b8a32"
               raised
               reverse
               onPress={() =>
@@ -168,7 +168,7 @@ function RenderComments({ comments }) {
   };
 
   return (
-    <Animatable.View animation="fadeInUp" duration={2000} delay={1000}>
+    <Animatable.View animation="fadeInUp" duration={800} delay={400}>
       <Card title="Comments">
         <FlatList
           data={comments}
@@ -236,7 +236,7 @@ class ServiceInfo extends Component {
       <ScrollView>
         <RenderServices
           service={service}
-          favorite={this.props.favorites.includes(serviceId)}
+          favorite={this.props.ApptDate.includes(serviceId)}
           markFavorite={() => this.markFavorite(serviceId)}
           onShowModal={() => this.toggleModal()}
         />

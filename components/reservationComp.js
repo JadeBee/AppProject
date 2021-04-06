@@ -13,6 +13,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Animatable from "react-native-animatable";
 import { Alert } from "react-native";
 import * as Notifications from "expo-notifications";
+import { clockRunning } from "react-native-reanimated";
 
 class Reservation extends Component {
   constructor(props) {
@@ -22,6 +23,7 @@ class Reservation extends Component {
       campers: 1,
       hikeIn: false,
       date: new Date(),
+      // time: new DateTimePicker(),
       showCalendar: false,
       showModal: false,
       showAlert: false,
@@ -29,7 +31,7 @@ class Reservation extends Component {
   }
 
   static navigationOptions = {
-    title: "Reserve Campsite",
+    title: "Reserve Appointment",
   };
 
   toggleModal() {
@@ -55,10 +57,19 @@ class Reservation extends Component {
     });
   }
 
+  // showMode(currentMode) {
+  //   setShow(true);
+  //   setMode(currentMode);
+  // }
+
+  // showTimepicker() {
+  //   showMode("time");
+  // }
+
   createAlert = () =>
     Alert.alert(
       "Create Search?",
-      `Number of campers: ${this.state.campers} \nHike-In? ${this.state.hikeIn} \nDate: ${this.state.date}`,
+      `Number of Patients: ${this.state.campers} \nHike-In? ${this.state.hikeIn} \nDate: ${this.state.date}`,
       [
         {
           text: "Cancel",
@@ -82,7 +93,7 @@ class Reservation extends Component {
 
       Notifications.scheduleNotificationAsync({
         content: {
-          title: "Your Campsite Reservation Search",
+          title: "Your Appointment(s)",
           body: `Search for ${date} requested`,
         },
         trigger: null,
@@ -101,9 +112,9 @@ class Reservation extends Component {
   render() {
     return (
       <ScrollView>
-        <Animatable.View animation="zoomIn" duration={2000} delay={1000}>
+        <Animatable.View animation="zoomIn" duration={800} delay={400}>
           <View style={styles.formRow}>
-            <Text style={styles.formLabel}>Number of Campers</Text>
+            <Text style={styles.formLabel}>Number of Patients</Text>
             <Picker
               style={styles.formItem}
               selectedValue={this.state.campers}
@@ -120,11 +131,20 @@ class Reservation extends Component {
             </Picker>
           </View>
           <View style={styles.formRow}>
-            <Text style={styles.formLabel}>Hike-In?</Text>
+            <Text style={styles.formLabel}>Virtual?</Text>
             <Switch
               style={styles.formItem}
               value={this.state.hikeIn}
-              trackColor={{ true: "#5637DD", false: null }}
+              trackColor={{ true: "#5b8a32", false: null }}
+              onValueChange={(value) => this.setState({ hikeIn: value })}
+            />
+          </View>
+          <View style={styles.formRow}>
+            <Text style={styles.formLabel}>In-Person?</Text>
+            <Switch
+              style={styles.formItem}
+              value={this.state.hikeIn}
+              trackColor={{ true: "#5b8a32", true: null }}
               onValueChange={(value) => this.setState({ hikeIn: value })}
             />
           </View>
@@ -135,7 +155,7 @@ class Reservation extends Component {
                 this.setState({ showCalendar: !this.state.showCalendar })
               }
               title={this.state.date.toLocaleDateString("en-US")}
-              color="#5637DD"
+              color="#5b8a32"
               accessibilityLabel="Tap me to select a reservation date"
             />
           </View>
@@ -146,17 +166,36 @@ class Reservation extends Component {
               display="default"
               onChange={(event, selectedDate) => {
                 selectedDate &&
-                  this.setState({ date: selectedDate, showCalendar: false });
+                  this.setState({
+                    date: selectedDate,
+                    time: selectedValue,
+                    showCalendar: false,
+                  });
               }}
               style={styles.formItem}
             />
           )}
+          {/*<View>
+            <View>
+              <Button onPress={showTimepicker} title="Show time picker!" />
+            </View>
+            {show && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode={mode}
+                is24Hour={false}
+                display="default"
+                onChange={onChange}
+              />
+            )} 
+          </View>*/}
           <View style={styles.formRow}>
             <Button
               onPress={() => this.createAlert()}
               title="Search"
-              color="#5637DD"
-              accessibilityLabel="Tap me to search for available campsites to reserve"
+              color="#5b8a32"
+              accessibilityLabel="Tap me to search for available appointmets to reserve"
             />
           </View>
         </Animatable.View>
@@ -183,11 +222,12 @@ const styles = StyleSheet.create({
   modal: {
     justifyContent: "center",
     margin: 20,
+    backgroundColor: "#abe0d6",
   },
   modalTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    backgroundColor: "#5637DD",
+    backgroundColor: "#5b8a32",
     textAlign: "center",
     color: "#fff",
     marginBottom: 20,

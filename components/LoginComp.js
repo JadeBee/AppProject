@@ -96,7 +96,7 @@ class LoginTab extends Component {
                 iconStyle={{ marginRight: 10 }}
               />
             }
-            buttonStyle={{ backgroundColor: "#5637DD" }}
+            buttonStyle={{ backgroundColor: "#abe0d6" }}
           />
         </View>
         <View style={styles.formButton}>
@@ -108,11 +108,11 @@ class LoginTab extends Component {
               <Icon
                 name="user-plus"
                 type="font-awesome"
-                color="blue"
+                color="#5b8a32"
                 iconStyle={{ marginRight: 10 }}
               />
             }
-            titleStyle={{ color: "blue" }}
+            titleStyle={{ color: "#5b8a32" }}
           />
         </View>
       </View>
@@ -266,7 +266,7 @@ class RegisterTab extends Component {
                   iconStyle={{ marginRight: 10 }}
                 />
               }
-              buttonStyle={{ backgroundColor: "#5637DD" }}
+              buttonStyle={{ backgroundColor: "#abe0d6" }}
             />
           </View>
         </View>
@@ -282,8 +282,8 @@ const Login = createBottomTabNavigator(
   },
   {
     tabBarOptions: {
-      activeBackgroundColor: "#5637DD",
-      inactiveBackgroundColor: "#CEC8FF",
+      activeBackgroundColor: "#5b8a32",
+      inactiveBackgroundColor: "#abe0d6",
       activeTintColor: "#fff",
       inactiveTintColor: "#808080",
       labelStyle: { fontSize: 16 },
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   },
   formCheckbox: {
     margin: 8,
-    backgroundColor: null,
+    backgroundColor: "#abe0d6",
   },
   formButton: {
     margin: 20,
