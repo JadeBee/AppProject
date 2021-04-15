@@ -7,6 +7,7 @@ import Contact from "./BillComp";
 import Reservation from "./reservationComp";
 import Favorites from "./ResourcesComp";
 import {
+  Button,
   View,
   Platform,
   StyleSheet,
@@ -30,6 +31,7 @@ import {
 } from "../redux/ActionCreators";
 import Login from "./LoginComp";
 import NetInfo from "@react-native-community/netinfo";
+import axios from "axios";
 
 const mapDispatchToProps = {
   fetchServices,
@@ -330,28 +332,34 @@ const MainNavigator = createDrawerNavigator(
 const AppNavigator = createAppContainer(MainNavigator);
 
 class Main extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { isToggleOn: true };
+
+    // This binding is necessary to make `this` work in the callback
+    this.handlePress = this.handlePress.bind(this);
+  }
+
   componentDidMount() {
-    this.props.fetchServices();
-    this.props.fetchComments();
-    this.props.fetchPromotions();
-    this.props.fetchPartners();
-
-    NetInfo.fetch().then((connectionInfo) => {
-      Platform.OS === "ios"
-        ? Alert.alert("Initial Network Connectivity Type:", connectionInfo.type)
-        : ToastAndroid.show(
-            "Initial Network Connectivity Type: " + connectionInfo.type,
-            ToastAndroid.LONG
-          );
-    });
-
-    this.unsubscribeNetInfo = NetInfo.addEventListener((connectionInfo) => {
-      this.handleConnectivityChange(connectionInfo);
-    });
+    // this.props.fetchServices();
+    // this.props.fetchComments();
+    // this.props.fetchPromotions();
+    // this.props.fetchPartners();
+    // NetInfo.fetch().then((connectionInfo) => {
+    //   Platform.OS === "ios"
+    //     ? Alert.alert("Initial Network Connectivity Type:", connectionInfo.type)
+    //     : ToastAndroid.show(
+    //         "Initial Network Connectivity Type: " + connectionInfo.type,
+    //         ToastAndroid.LONG
+    //       );
+    // });
+    // this.unsubscribeNetInfo = NetInfo.addEventListener((connectionInfo) => {
+    //   this.handleConnectivityChange(connectionInfo);
+    // });
   }
 
   componentWillUnmount() {
-    this.unsubscribeNetInfo();
+    //this.unsubscribeNetInfo();
   }
 
   handleConnectivityChange = (connectionInfo) => {
@@ -375,6 +383,27 @@ class Main extends Component {
       : ToastAndroid.show(connectionMsg, ToastAndroid.LONG);
   };
 
+  handlePress() {
+    console.log("clicked");
+    // Make a request for a user with a given ID
+    const url = `http://10.0.0.107:8080/`;
+    console.log(url);
+    axios
+      .get(url)
+      .then(function (response) {
+        // handle success
+        console.log(response);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log("The error is", error);
+      })
+      .then(function () {
+        console.log("Finished");
+        // always executed
+      });
+  }
+
   render() {
     return (
       <View
@@ -384,7 +413,13 @@ class Main extends Component {
             Platform.OS === "ios" ? 0 : Expo.Constants.statusBarHeight,
         }}
       >
-        <AppNavigator />
+        {/* <AppNavigator /> */}
+        <Button
+          onPress={() => this.handlePress()}
+          title="Click me!"
+          color="#841584"
+          accessibilityLabel="Learn more about this purple button"
+        />
       </View>
     );
   }
